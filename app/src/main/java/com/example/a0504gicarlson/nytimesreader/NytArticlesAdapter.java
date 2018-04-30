@@ -4,9 +4,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.a0504gicarlson.nytimesreader.model.Article;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -51,8 +53,11 @@ public class NytArticlesAdapter extends RecyclerView.Adapter<NytArticlesAdapter.
         ViewGroup itemViewGroup = (ViewGroup)holder.itemView;
         TextView titleView = itemViewGroup.findViewById(R.id.titleView);
         TextView abstractView = itemViewGroup.findViewById(R.id.abstractView);
+        ImageView imageView = itemViewGroup.findViewById(R.id.imageView);
         titleView.setText(article.getTitle());
         abstractView.setText(article.getArticleAbstract());
+        Picasso.get().load(article.getImageURL()).into(imageView);
+
     }
 
 

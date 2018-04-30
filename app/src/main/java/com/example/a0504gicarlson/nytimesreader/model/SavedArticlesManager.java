@@ -2,8 +2,12 @@ package com.example.a0504gicarlson.nytimesreader.model;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by 0504gicarlson on 30/04/2018.
@@ -12,10 +16,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class SavedArticlesManager {
     private static final SavedArticlesManager ourInstance = new SavedArticlesManager();
     ArticleDatabaseHelper articleDatabaseHelper;
-    public void initWithContext(Context context){
-        if (articleDatabaseHelper == null){
+
+    public void initWithContext(Context context) {
+        if (articleDatabaseHelper == null) {
             articleDatabaseHelper = new ArticleDatabaseHelper(context);
-            articleDatabaseHelper.addArticle("Fake Title","Fake Abstract");
+            articleDatabaseHelper.addArticle("Fake Title", "Fake Abstract");
         }
     }
 
@@ -44,19 +49,41 @@ public class SavedArticlesManager {
         @Override
         public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         }
-        public void addArticle(String title, String articleAbstract){
+
+        public void addArticle(String title, String articleAbstract) {
             ContentValues articleValues = new ContentValues();
             articleValues.put("TITLE", title);
             articleValues.put("ABSTRACT", articleAbstract);
-            getWritableDatabase().insert("ARTICLES",null,articleValues);
+            getWritableDatabase().insert("ARTICLES", null, articleValues);
 
         }
-        public void clearArticles(){
+
+        public void clearArticles() {
             String clearDBQuery = "DELETE FROM ARTICLES";
             getWritableDatabase().execSQL(clearDBQuery);
         }
     }
 
-    private SavedArticlesManager() {
+    public void saveArticles(List<Article> articles) {
+        articleDatabaseHelper.clearArticles();
+        for (Article article : articles) {
+            articleDatabaseHelper.addArticle(article.title, article.articleAbstract);
+        }
+
+    }
+
+    public ArrayList<Article> getAllArticles() {
+        Cursor cursor = articleDatabaseHelper.getReadableDatabase().query("ARTICLES", new String[]{"_id", "TITLE", "ABSTRACT"}, null, null, null, null, null);
+        ArrayList<Article> articles = new ArrayList<>();
+        for (int i = 0; i < cursor.getCount(); i++) {
+            if (cursor.moveToNext()) {
+                String title = cursor.getString(1);
+                String articleAbstract = cursor.getString(2);
+                Article article = new Article(title, articleAbstract);
+                articles.add(article);
+            }
+        }
+        cursor.close();
+        return articles;
     }
 }

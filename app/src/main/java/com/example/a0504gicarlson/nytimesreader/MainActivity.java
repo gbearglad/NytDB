@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     String nytUrl = "https://api.nytimes.com/svc/topstories/v2/technology.json?api-key=88111103e9a649df9be4e7f7145e0f2d";
@@ -28,10 +29,17 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String response = intent.getStringExtra("responseString");
-            ArrayList<Article> articles = parseTopStoriesResponse(response);
-            nytArticlesAdapter.setArticleArrayList(articles);
-            Log.d("SecondTag", response);
+            if (intent.getAction().equalsIgnoreCase("httpRequestComplete")) {
+                String response = intent.getStringExtra("responseString");
+                ArrayList<Article> articles = parseTopStoriesResponse(response);
+                nytArticlesAdapter.setArticleArrayList(articles);
+                SavedArticlesManager.getInstance().saveArticles(articles);
+                Log.d("SecondTag", response);
+            }
+            else if (intent.getAction().equalsIgnoreCase("httpRequestFailed")){
+                ArrayList<Article> articles = SavedArticlesManager.getInstance().getAllArticles();
+                nytArticlesAdapter.setArticleArrayList(articles);
+            }
         }
     }
 
@@ -44,7 +52,9 @@ public class MainActivity extends AppCompatActivity {
         HttpReceiver httpReceiver = new HttpReceiver();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("httpRequestComplete");
+        intentFilter.addAction("httpRequestFailed");
         registerReceiver(httpReceiver, intentFilter);
+
 
         nytArticlesAdapter = new NytArticlesAdapter();
         RecyclerView articleRecyclerView = findViewById(R.id.articleRecyclerView);
@@ -65,7 +75,11 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject jsonArticle = jsonArray.getJSONObject(i);
                 String title = jsonArticle.getString("title");
                 String articleAbstract = jsonArticle.getString("abstract");
+                JSONArray multimedia = jsonArticle.getJSONArray("multimedia");
+                JSONObject firstMultimedia = multimedia.getJSONObject(0);
+                String imageURL = firstMultimedia.getString("url");
                 Article newArticle = new Article(title, articleAbstract);
+                newArticle.setImageURL(imageURL);
                 articles.add(newArticle);
             }
 

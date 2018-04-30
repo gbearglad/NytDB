@@ -16,7 +16,7 @@ import okhttp3.Response;
  */
 
 public class HttpRequestService extends IntentService {
- static String EXTRA_URLSTRING = "123456";
+    static String EXTRA_URLSTRING = "123456";
 
     public HttpRequestService() {
         super("HttpRequestService");
@@ -34,19 +34,21 @@ public class HttpRequestService extends IntentService {
             String responseString = new String(response.body().string());
             Intent completeIntent = new Intent("httpRequestComplete");
             completeIntent.putExtra("responseString", responseString);
-            Log.d("TAG",responseString);
+            Log.d("TAG", responseString);
             sendBroadcast(completeIntent);
 
         } catch (IOException e) {
+            Intent failedRequestIntent = new Intent("httpRequestFailed");
+            sendBroadcast(failedRequestIntent);
             e.printStackTrace();
         }
 
 
     }
 
-    public static void startActionRequestHttp(Context context, String url){
+    public static void startActionRequestHttp(Context context, String url) {
         Intent intent = new Intent(context, HttpRequestService.class);
-        intent.putExtra(EXTRA_URLSTRING,url);
+        intent.putExtra(EXTRA_URLSTRING, url);
         context.startService(intent);
 
 

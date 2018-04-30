@@ -7,6 +7,16 @@ package com.example.a0504gicarlson.nytimesreader.model;
 public class Article {
     String title;
     String articleAbstract;
+    String imageURL;
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
+
+    public String getImageURL() {
+        return imageURL;
+    }
 
     public String getTitle() {
         return title;
